@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour {
+public class MovementController : MonoBehaviour {
     // Velocity related components
     private Vector2 moveDir = Vector2.zero;
     [SerializeField] private float playerSpeed = 5f;

@@ -6,6 +6,10 @@ TagManager:
   tags:
   - Blood Particle System
   - Wall
+  - Spikes
+  - Flag
+  - Player Base
+  - Flag Base
   layers:
   - Default
   - TransparentFX
