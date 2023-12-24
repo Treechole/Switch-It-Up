@@ -10,8 +10,17 @@ public class MovementController : MonoBehaviour {
     private Vector2 moveDir = Vector2.zero;
     [SerializeField] private float playerSpeed = 5f;
 
+    // Common Functions
+    private CommonFunctions commonFunctions;
+
+    private void Awake() {
+        commonFunctions = GameObject.Find("Common Functions Container").GetComponent<CommonFunctions>();
+    }
+
     private void Update() {
-        PlayerMovement();
+        if (!commonFunctions.editMode) {
+            PlayerMovement();
+        }
     }
 
     // Functions for movement of the Player -

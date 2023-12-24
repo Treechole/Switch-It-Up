@@ -10,6 +10,7 @@ TagManager:
   - Flag
   - Player Base
   - Flag Base
+  - Floor
   layers:
   - Default
   - TransparentFX

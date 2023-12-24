@@ -29,6 +29,8 @@ public class PlayerBaseController : MonoBehaviour {
         flag.SetParent(null);
         flag.position = transform.position;
         flag.GetComponent<BoxCollider2D>().enabled = true;
+
+        commonFunctions.SwitchCurrentMode();
     }
 
     private void InitializeBase() {
