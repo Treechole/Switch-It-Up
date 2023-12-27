@@ -12,7 +12,7 @@ public class SpikesController : MonoBehaviour {
     private bool playerOnPlatform = false;
 
     // Spike-mechanism related info
-    private bool recharged = true;
+    private bool recharged = false;
     private bool currentlyRecharging = false;
 
     private void Update() {

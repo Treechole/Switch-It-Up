@@ -40,9 +40,7 @@ public class HealthController : MonoBehaviour {
 
     // Health-related events
     private void CharacterDied () {
-        if (this.gameObject.CompareTag("Player")) {
-            Debug.Log("Game Over!");
-        }
+        Debug.Log("Game Over!");
         Destroy(this.gameObject);
     }
 

@@ -1,16 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.Tilemaps;
 
-public class SelectObject : MonoBehaviour {
-    public GameObject selectedObject = null;
+public class SelectObject : MonoBehaviour, IPointerClickHandler {
+    public GameObject selectedGameObject = null;
     
     private Dictionary<int, GameObject> objects = new Dictionary<int, GameObject>();
-
     private List<int> slotIndices = new List<int>();
+
+    private Color selectedColor = new Color(1f, 1f, 1f, 125f/255f);
+    private Color unselectedColor = new Color(0.1603774f, 0.1603774f, 0.1603774f, 0.7058824f);
 
     private void Awake() {
         InitializeObjects();
@@ -41,7 +44,7 @@ public class SelectObject : MonoBehaviour {
 
         foreach (int i in slotIndices) {
             if (Input.GetKeyUp(KeyCode.Alpha1 + i)) {
-                if (ifPresentIn(i, objects.Keys)) { // For de-selection of object when an empty slot is pressed;
+                if (objects.Keys.Contains(i)) { // For de-selection of object when an empty slot is pressed;
                     numberSelection = objects[i];
                 } else {
                     DeselectOtherObjects(null);
@@ -53,29 +56,42 @@ public class SelectObject : MonoBehaviour {
     }
 
     public void SelectCurrentObject(GameObject selection) {
-        // ObjectManager selectionManager = selection.GetComponent<ObjectManager>();
-        selectedObject = selection; //Manager.GetObject();
+        selectedGameObject = selection;
         
         Transform selectionSlot = selection.transform.parent;
-        selectionSlot.GetComponent<Image>().color = new Color(1f, 1f, 1f, 125f/255f);
+        selectionSlot.GetComponent<Image>().color = selectedColor;
     }
 
     public void DeselectOtherObjects(GameObject selection) {
         foreach (GameObject obj in objects.Values) {
             if (obj != selection) {
                 Transform objSlot = obj.transform.parent;
-                objSlot.GetComponent<Image>().color = new Color(0.1603774f, 0.1603774f, 0.1603774f, 0.7058824f);
+                objSlot.GetComponent<Image>().color = unselectedColor;
             }
         }
     }
 
-    private bool ifPresentIn(int i, Dictionary<int, GameObject>.KeyCollection list) {
-        foreach (int element in list) {
-            if (i == element) {
-                return true;
+    // Add a system to redo placement of tiles 
+
+    public void RemoveUsedItem(GameObject itemToRemove) {
+        foreach (int objIndex in objects.Keys) {
+            if (itemToRemove == objects[objIndex]) {
+                if (objects[objIndex] == selectedGameObject) {
+                    selectedGameObject = null;
+                    objects[objIndex].transform.parent.GetComponent<Image>().color = unselectedColor;
+                }
+
+                objects.Remove(objIndex);
+                break;
             }
         }
+    }
 
-        return false;
+    // To deselect object on clicking empty spaces in the panel
+    public void OnPointerClick(PointerEventData eventData) {
+        if (eventData.button == PointerEventData.InputButton.Left) {
+            selectedGameObject = null;
+            DeselectOtherObjects(null);
+        }
     }
 }
