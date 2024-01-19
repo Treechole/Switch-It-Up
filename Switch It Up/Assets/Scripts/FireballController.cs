@@ -5,11 +5,20 @@ using UnityEngine;
 public class FireballController : MonoBehaviour {
     private Vector2 moveDir;
     private float fireballSpeed = 5f;
-
     private float fireballDamage = 20f;
+    
+    private EditModeManager editModeManager;
+
+    private void Awake() {
+        editModeManager = GameObject.Find("Edit Mode").GetComponent<EditModeManager>();
+    }
 
     private void Update() {
         transform.position += new Vector3(moveDir.x, moveDir.y, 0) * fireballSpeed * Time.deltaTime;
+
+        if (editModeManager.CanEdit()) {
+            Destroy(gameObject);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D character) {

@@ -11,19 +11,26 @@ public class ShootingFireballsController : MonoBehaviour {
 
     private Tilemap shooterTilemap;
 
+    private EditModeManager editModeManager;
+
     private void Awake() {
         shooterTilemap = GetComponent<Tilemap>();
+        editModeManager = GameObject.Find("Edit Mode").GetComponent<EditModeManager>();
     }
 
     private void Update() {
-        if (recharged) {
-            ShootFireball();
-        } else if (!currentlyRecharging) {
-            StartCoroutine(RechargeFireball());
+        if (!editModeManager.CanEdit()) {
+            if (recharged) {
+                ShootFireball();
+            } else if (!currentlyRecharging) {
+                StartCoroutine(RechargeFireball());
+            }
+        } else {
+            recharged = false;
+            currentlyRecharging = false;
         }
     }
 
-    // Program the fireball
     // Design the shooter and subsequently the fireballs for them being at different walls - shooting fireballs down, up, left, right as well
     private List<Vector3Int> GetShooterPositions() {
         List<Vector3Int> shooterPos = new List<Vector3Int>();

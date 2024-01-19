@@ -15,13 +15,24 @@ public class SpikesController : MonoBehaviour {
     private bool recharged = false;
     private bool currentlyRecharging = false;
 
-    private void Update() {
-        if (playerOnPlatform) {
-            DamagePlayer();
-        }
+    private EditModeManager editModeManager;
 
-        if (!recharged && !currentlyRecharging) {
-            StartCoroutine(RechargePlatform());
+    private void Awake() {
+        editModeManager = GameObject.Find("Edit Mode").GetComponent<EditModeManager>();
+    }
+
+    private void Update() {
+        if (!editModeManager.CanEdit()) {
+            if (playerOnPlatform) {
+                DamagePlayer();
+            }
+
+            if (!recharged && !currentlyRecharging) {
+                StartCoroutine(RechargePlatform());
+            }
+        } else {
+            recharged = false;
+            currentlyRecharging = false;
         }
     }
 

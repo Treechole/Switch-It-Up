@@ -11,14 +11,14 @@ public class MovementController : MonoBehaviour {
     [SerializeField] private float playerSpeed = 5f;
 
     // Common Functions
-    private CommonFunctions commonFunctions;
+    private EditModeManager editModeManager;
 
     private void Awake() {
-        commonFunctions = GameObject.Find("Common Functions Container").GetComponent<CommonFunctions>();
+        editModeManager = GameObject.Find("Edit Mode").GetComponent<EditModeManager>();
     }
 
     private void Update() {
-        if (!commonFunctions.editMode) {
+        if (!editModeManager.CanEdit()) {
             PlayerMovement();
         }
     }
@@ -95,19 +95,5 @@ public class MovementController : MonoBehaviour {
         } else {
             return moveDir;
         }
-    }
-
-    // A function to find a GameObject with some tag in children of given parent
-    public GameObject FindWithTag (GameObject parent, string tag) {
-        GameObject requiredChild = null;
-
-        foreach (Transform transform in parent.transform) {
-            if (transform.CompareTag(tag)) {
-                requiredChild = transform.gameObject;
-                break;
-            }
-        }
-
-        return requiredChild;
     }
 }

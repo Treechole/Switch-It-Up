@@ -5,13 +5,10 @@ using UnityEngine;
 public class FlagController : MonoBehaviour {
     // A boolean to know if the flag is captured
     private bool isCaptured = false;
-    private GameObject flagBase;
-    private CommonFunctions commonFunctions;
+    [SerializeField] private GameObject flagBase;
 
     private void Awake() {
-        commonFunctions = GameObject.Find("Common Functions Container").GetComponent<CommonFunctions>();
-
-        flagBase = commonFunctions.FindChildWithTag(gameObject, "Flag Base");
+        flagBase.transform.position = transform.position;
     }
 
     // On interacting with the flag

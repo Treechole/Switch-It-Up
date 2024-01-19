@@ -4,12 +4,14 @@ using System.Linq;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class SelectObject : MonoBehaviour, IPointerClickHandler {
     public GameObject selectedGameObject = null;
     
-    private Dictionary<int, GameObject> objects = new Dictionary<int, GameObject>();
+    public Dictionary<int, GameObject> objects = new Dictionary<int, GameObject>();
+    public Dictionary<TileBase, GameObject> tilesGameObject = new Dictionary<TileBase, GameObject>();
     private List<int> slotIndices = new List<int>();
 
     private Color selectedColor = new Color(1f, 1f, 1f, 125f/255f);
@@ -19,12 +21,15 @@ public class SelectObject : MonoBehaviour, IPointerClickHandler {
         InitializeObjects();
     }
 
+    // Temporary system - try to implement enum on tiles
     private void InitializeObjects() {
         for (int slotIndex = 0; slotIndex < transform.childCount; slotIndex++) {
             bool objectInSlot = transform.GetChild(slotIndex).childCount == 1;
             if (objectInSlot) {
                 Transform obj = transform.GetChild(slotIndex).GetChild(0);
                 objects.Add(slotIndex, obj.gameObject);
+
+                tilesGameObject.Add(obj.GetComponent<ObjectManager>().GetObject().tile, obj.gameObject);
             }
 
             slotIndices.Add(slotIndex);
@@ -94,4 +99,5 @@ public class SelectObject : MonoBehaviour, IPointerClickHandler {
             DeselectOtherObjects(null);
         }
     }
+
 }

@@ -7,10 +7,12 @@ using UnityEngine.UIElements;
 public class PlayerBaseController : MonoBehaviour {
     private Transform player;
     private CommonFunctions commonFunctions;
+    private EditModeManager editModeManager;
 
     private void Awake() {
         player = GameObject.Find("Player").transform;
         commonFunctions = GameObject.Find("Common Functions Container").GetComponent<CommonFunctions>();
+        editModeManager = GameObject.Find("Edit Mode").GetComponent<EditModeManager>();
 
         InitializeBase();
     }
@@ -30,7 +32,7 @@ public class PlayerBaseController : MonoBehaviour {
         flag.position = transform.position;
         flag.GetComponent<BoxCollider2D>().enabled = true;
 
-        commonFunctions.SwitchCurrentMode();
+        editModeManager.SwitchMode();
     }
 
     private void InitializeBase() {

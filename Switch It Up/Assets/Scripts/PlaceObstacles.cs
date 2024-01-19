@@ -9,12 +9,14 @@ using UnityEngine.Tilemaps;
 public class PlaceObstacles : MonoBehaviour {
     [SerializeField] private SelectObject objectSelection;
     private GameObject selectedGameObject = null;
+    private Dictionary<TileBase, GameObject> tilesGameObject = new Dictionary<TileBase, GameObject>();
 
-    private Tilemap floorTilemap;
     [SerializeField] private GameObject playerBase;
+    [SerializeField] private GameObject flagBase;
 
+    [SerializeField] private Tilemap floorTilemap;
     [SerializeField] private Tilemap placeabilityTilemap;
-    [SerializeField] private List<Tilemap> tilemaps = new List<Tilemap>();
+    [SerializeField] private List<Tilemap> objectTilemaps = new List<Tilemap>();
 
     [SerializeField] private Tile placeableTile;
     [SerializeField] private Tile nonPlaceableTile;
@@ -22,15 +24,17 @@ public class PlaceObstacles : MonoBehaviour {
     private Vector3Int previousMousePosition;
     private Vector3Int currentMousePosition;
 
-    [SerializeField] private List<TileBase> wallTiles;
+    private TileBase currentObjectTile = null;
 
     private void Awake() {
-        floorTilemap = GetComponent<Tilemap>();
         previousMousePosition = floorTilemap.WorldToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
     }
 
     private void Update() {
         selectedGameObject = objectSelection.selectedGameObject;
+        tilesGameObject = objectSelection.tilesGameObject;
+
+        currentObjectTile = GetObjectTileAt(currentMousePosition);
         PlaceTilesOnHoverAndClick();
     }
 
@@ -41,7 +45,10 @@ public class PlaceObstacles : MonoBehaviour {
         if (onFloorTile) {
             if (isTilePlaceable(currentMousePosition)) {
                 placeabilityTilemap.SetTile(currentMousePosition, placeableTile);
-                if (Input.GetMouseButtonDown(0)) { PlaceObject(); }
+                if (Input.GetMouseButtonDown(0)) {
+                    if (canChangeCurrentTile()) { RemoveObject(currentMousePosition); }
+                    PlaceObject();
+                }
             } else {
                 placeabilityTilemap.SetTile(currentMousePosition, nonPlaceableTile);
             }
@@ -51,57 +58,61 @@ public class PlaceObstacles : MonoBehaviour {
     }
 
     private bool isTilePlaceable(Vector3Int tilePosition) {
+        bool canChangeTile = true;
+        if (currentObjectTile && !canChangeCurrentTile()) { canChangeTile = false; }
+
+        return !isTileNearBases(tilePosition) && canChangeTile;
+    }
+
+    private bool isTileNearBases(Vector3Int tilePosition) {
         Vector3Int playerBasePosition = floorTilemap.WorldToCell(playerBase.transform.position);
-        List<Vector3Int> firstNeighbours = GetFirstNeighbours();
+        Vector3Int flagBasePosition = floorTilemap.WorldToCell(flagBase.transform.position);
 
-        if (Vector3.Magnitude(playerBasePosition - tilePosition) < 2 || !firstNeighbours.Contains(tilePosition)) {
-            return false;
+        if (Vector3.Magnitude(playerBasePosition - tilePosition) < 2 || Vector3.Magnitude(flagBasePosition - tilePosition) < 2) {
+            return true;
         }
-        return true;
+        
+        return false;
     }
 
-    private List<Vector3Int> GetFirstNeighbours() {
-        List<Vector3Int> neighbours = new List<Vector3Int>();
-
-        foreach (Vector3Int tilePos in tilemaps[0].cellBounds.allPositionsWithin) {
-            for (int x = -1; x <= 1; x++) {
-                for (int y = -1; y <= 1; y++) {
-                    Vector3Int neighbourTilePos = tilePos + new Vector3Int(x, y, 0);
-                    if (tilemaps[0].HasTile(tilePos) && !tilemaps[0].HasTile(neighbourTilePos) && !neighbours.Contains(neighbourTilePos)) {
-                        neighbours.Add(neighbourTilePos);
-                    }
-                }
-            }
+    private TileBase GetObjectTileAt(Vector3Int tilePosition) {
+        foreach (Tilemap tilemap in objectTilemaps) {
+            TileBase currentTile = tilemap.GetTile(tilePosition);
+            if (currentTile) { return currentTile; }
         }
 
-        return neighbours;
+        return null;
     }
 
+    private bool canChangeCurrentTile() {
+        if (currentObjectTile && selectedGameObject) {
+            TileBase selectedTile = selectedGameObject.GetComponent<ObjectManager>().GetObject().tile;
+            if (currentObjectTile != selectedTile) { return true; }
+        }
+
+        return false;
+    }
+    
     private void PlaceObject() {
         if (selectedGameObject != null) {
             ObjectManager selection_ObjectManager = selectedGameObject.GetComponent<ObjectManager>();
             PlaceableObject selectedObject = selection_ObjectManager.GetObject();
 
-            // Refine code by using things nly once - yaani connect information with each other rather than re utilising the base info again
-            // Like having all the tilempas stored in some list according to the ObjectType enum and then using the values of enum (0, 1, 2, ...) and accessing the tilemaps
-
-            Tilemap objectTilemap = tilemaps[(int) selectedObject.type];
+            Tilemap objectTilemap = objectTilemaps[(int) selectedObject.type];
             TileBase selectedTile = selectedObject.tile;
 
             objectTilemap.SetTile(currentMousePosition, selectedTile);
-
-            // switch (selectedObject.type) {
-            //     case PlaceableObject.ObjectType.Wall:
-            //         // wallTilemap.SetTile(currentMousePosition, selectedObject.tile);
-            //         UpdateWall(currentMousePosition, objectTilemap);
-            //         break;
-
-                // case PlaceableObject.ObjectType.Spikes:
-                //     spikesTilemap.SetTile(currentMousePosition, selectedObject.tile);
-                //     break;
-            // }
-
             selection_ObjectManager.UpdateObjectQuantity(-1);
+        }
+    }
+
+    private void RemoveObject(Vector3Int tilePosition) {
+        if (currentObjectTile) {
+            GameObject placedGameObject = tilesGameObject[currentObjectTile];
+            Tilemap placedObject_Tilemap = objectTilemaps[(int) placedGameObject.GetComponent<ObjectManager>().GetObject().type];
+
+            placedObject_Tilemap.SetTile(tilePosition, null);
+            placedGameObject.GetComponent<ObjectManager>().UpdateObjectQuantity(1);
         }
     }
 
