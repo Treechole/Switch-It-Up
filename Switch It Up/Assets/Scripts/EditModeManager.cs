@@ -2,17 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class EditModeManager : MonoBehaviour {
     private bool editMode = false;
 
     [SerializeField] private GameObject flag;
-    [SerializeField] private GameObject flagBase;
 
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject playerBase;
 
     [SerializeField] private GameObject healthBarSprite;
+    [SerializeField] private Tilemap placeabilityTilemap;
     [SerializeField] private GameObject objectSelector;
     [SerializeField] private PlaceObstacles placeObjects;
 
@@ -39,6 +40,7 @@ public class EditModeManager : MonoBehaviour {
         objectSelector.SetActive(false);
         placeObjects.enabled = false;
 
+        HidePlaceability();
         cinemachine.GetComponent<CinemachineVirtualCamera>().Priority = 11;
 
         editMode = false;
@@ -50,11 +52,18 @@ public class EditModeManager : MonoBehaviour {
         placeObjects.enabled = true;
 
         player.transform.position = playerBase.transform.position;
-        flag.transform.position = flagBase.transform.position;
-        flagBase.SetActive(true);
+        flag.GetComponent<FlagController>().ReturnFlagToBase();
 
         cinemachine.GetComponent<CinemachineVirtualCamera>().Priority = 9;
 
         editMode = true;
+    }
+
+    private void HidePlaceability() {
+        foreach (Vector3Int tilePosition in placeabilityTilemap.cellBounds.allPositionsWithin) {
+            if (placeabilityTilemap.GetTile(tilePosition)) {
+                placeabilityTilemap.SetTile(tilePosition, null);
+            }
+        }
     }
 }

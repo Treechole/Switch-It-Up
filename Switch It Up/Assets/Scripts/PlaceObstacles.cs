@@ -16,7 +16,7 @@ public class PlaceObstacles : MonoBehaviour {
 
     [SerializeField] private Tilemap floorTilemap;
     [SerializeField] private Tilemap placeabilityTilemap;
-    [SerializeField] private List<Tilemap> objectTilemaps = new List<Tilemap>();
+    public List<Tilemap> objectTilemaps = new List<Tilemap>();
 
     [SerializeField] private Tile placeableTile;
     [SerializeField] private Tile nonPlaceableTile;
@@ -24,7 +24,7 @@ public class PlaceObstacles : MonoBehaviour {
     private Vector3Int previousMousePosition;
     private Vector3Int currentMousePosition;
 
-    private TileBase currentObjectTile = null;
+    public TileBase currentObjectTile = null;
 
     private void Awake() {
         previousMousePosition = floorTilemap.WorldToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
@@ -52,9 +52,9 @@ public class PlaceObstacles : MonoBehaviour {
             } else {
                 placeabilityTilemap.SetTile(currentMousePosition, nonPlaceableTile);
             }
-
-            HidePreviousTilePlaceablility();
         }
+
+        HidePreviousTilePlaceablility();
     }
 
     private bool isTilePlaceable(Vector3Int tilePosition) {
@@ -75,15 +75,6 @@ public class PlaceObstacles : MonoBehaviour {
         return false;
     }
 
-    private TileBase GetObjectTileAt(Vector3Int tilePosition) {
-        foreach (Tilemap tilemap in objectTilemaps) {
-            TileBase currentTile = tilemap.GetTile(tilePosition);
-            if (currentTile) { return currentTile; }
-        }
-
-        return null;
-    }
-
     private bool canChangeCurrentTile() {
         if (currentObjectTile && selectedGameObject) {
             TileBase selectedTile = selectedGameObject.GetComponent<ObjectManager>().GetObject().tile;
@@ -102,7 +93,7 @@ public class PlaceObstacles : MonoBehaviour {
             TileBase selectedTile = selectedObject.tile;
 
             objectTilemap.SetTile(currentMousePosition, selectedTile);
-            selection_ObjectManager.UpdateObjectQuantity(-1);
+            selection_ObjectManager.ChangeObjectQuantityBy(-1);
         }
     }
 
@@ -112,8 +103,17 @@ public class PlaceObstacles : MonoBehaviour {
             Tilemap placedObject_Tilemap = objectTilemaps[(int) placedGameObject.GetComponent<ObjectManager>().GetObject().type];
 
             placedObject_Tilemap.SetTile(tilePosition, null);
-            placedGameObject.GetComponent<ObjectManager>().UpdateObjectQuantity(1);
+            placedGameObject.GetComponent<ObjectManager>().ChangeObjectQuantityBy(1);
         }
+    }
+
+    private TileBase GetObjectTileAt(Vector3Int tilePosition) {
+        foreach (Tilemap tilemap in objectTilemaps) {
+            TileBase currentTile = tilemap.GetTile(tilePosition);
+            if (currentTile) { return currentTile; }
+        }
+
+        return null;
     }
 
     private void HidePreviousTilePlaceablility() {

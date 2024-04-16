@@ -19,23 +19,36 @@ public class ObjectManager : MonoBehaviour, IPointerClickHandler {
         objectImage = GetComponent<Image>();
         quantityText = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
 
-        // Initializing the object attributes
-        objectImage.sprite = obj.sprite;
-        UpdateObjectQuantity(0);
+        InitializeObject();
     }
 
-    public void UpdateObjectQuantity(int changeValueBy) {
+    private void InitializeObject() {
+        objectImage.sprite = obj.sprite;
+        ChangeObjectQuantityBy(0);
+    }
+
+    public void ChangeObjectQuantityBy(int changeValueBy) {
+        if (quantity == 0 && changeValueBy > 0) {
+            objectSelection.AddUsedObject(gameObject);
+        }
+
         quantity += changeValueBy;
 
         if (quantity > 1) {
+            gameObject.SetActive(true);
+
             quantityText.enabled = true;
             quantityText.SetText(quantity.ToString());
         } else if (quantity == 1) {
+            gameObject.SetActive(true);
+
             quantityText.enabled = false;
             quantityText.SetText("1");
         } else {
+            quantity = 0;
+
             gameObject.SetActive(false);
-            objectSelection.RemoveUsedItem(gameObject);
+            objectSelection.RemoveUsedObject(gameObject);
         }
     }
 

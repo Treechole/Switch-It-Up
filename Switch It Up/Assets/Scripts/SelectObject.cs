@@ -63,8 +63,10 @@ public class SelectObject : MonoBehaviour, IPointerClickHandler {
     public void SelectCurrentObject(GameObject selection) {
         selectedGameObject = selection;
         
-        Transform selectionSlot = selection.transform.parent;
-        selectionSlot.GetComponent<Image>().color = selectedColor;
+        if (selectedGameObject) {
+            Transform selectionSlot = selection.transform.parent;
+            selectionSlot.GetComponent<Image>().color = selectedColor;
+        }
     }
 
     public void DeselectOtherObjects(GameObject selection) {
@@ -76,9 +78,7 @@ public class SelectObject : MonoBehaviour, IPointerClickHandler {
         }
     }
 
-    // Add a system to redo placement of tiles 
-
-    public void RemoveUsedItem(GameObject itemToRemove) {
+    public void RemoveUsedObject(GameObject itemToRemove) {
         foreach (int objIndex in objects.Keys) {
             if (itemToRemove == objects[objIndex]) {
                 if (objects[objIndex] == selectedGameObject) {
@@ -86,10 +86,15 @@ public class SelectObject : MonoBehaviour, IPointerClickHandler {
                     objects[objIndex].transform.parent.GetComponent<Image>().color = unselectedColor;
                 }
 
-                objects.Remove(objIndex);
+                objects.Remove(objIndex);             
                 break;
             }
         }
+    }
+
+    public void AddUsedObject(GameObject itemToAdd) {
+        PlaceableObject objectToAdd = itemToAdd.GetComponent<ObjectManager>().GetObject();
+        objects.Add((int) objectToAdd.type, itemToAdd);
     }
 
     // To deselect object on clicking empty spaces in the panel

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FlagController : MonoBehaviour {
     // A boolean to know if the flag is captured
-    private bool isCaptured = false;
+    public bool isCaptured = false;
     [SerializeField] private GameObject flagBase;
 
     private void Awake() {
@@ -27,5 +27,15 @@ public class FlagController : MonoBehaviour {
         flagBase.SetActive(false);
 
         isCaptured = true;
+    }
+
+    public void ReturnFlagToBase() {
+        transform.SetParent(null);
+        transform.localPosition = flagBase.transform.position;
+        transform.GetComponent<BoxCollider2D>().enabled = true;
+
+        flagBase.SetActive(true);
+
+        isCaptured = false;
     }
 }
